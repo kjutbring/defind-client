@@ -7,10 +7,20 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -40,9 +50,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Location location = locationManager.getLastKnownLocation(provider);
 
         if (location != null) {
-            Log.i("Location info", "Location achieved!");
+            Log.i("DeviceLocation info", "DeviceLocation achieved!");
         } else {
-            Log.i("Location info", "No location");
+            Log.i("DeviceLocation info", "No location");
         }
     }
 
@@ -87,4 +97,45 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onProviderDisabled(String provider) {
 
     }
+
+    public JSONObject constructLocationJsonObject(DeviceLocation deviceLocation) {
+
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put("device", deviceLocation.getDevice());
+            jsonObject.put("lat", deviceLocation.getLat());
+            jsonObject.put("lng", deviceLocation.getLng());
+            jsonObject.put("time", deviceLocation.getTime());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject;
+    }
+
+    public class ApiActionTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+            URL url;
+            HttpsURLConnection httpsURLConnection = null;
+
+            
+
+            try {
+                url = new URL(urls[0]);
+
+                httpsURLConnection = (HttpsURLConnection) url.openConnection();
+
+
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }
