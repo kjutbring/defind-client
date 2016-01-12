@@ -12,6 +12,14 @@ public class DeviceLocation {
     private String lng;
     private Date time;
 
+    public DeviceLocation(String inDevice, String inLat, String inLng, Date inTime) {
+
+        device = inDevice;
+        lat = inLat;
+        lng = inLng;
+        time = inTime;
+    }
+
     public String getDevice() {
         return device;
     }
