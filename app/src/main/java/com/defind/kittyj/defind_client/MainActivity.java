@@ -9,8 +9,10 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -19,6 +21,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -73,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
 
-
     @Override
     public void onLocationChanged(Location location) {
         Double lat = location.getLatitude();
@@ -113,6 +115,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return jsonObject;
     }
 
+    public DeviceLocation createDeviceLocation(Location location) {
+
+        TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return null;
+        }
+        Location location1 = locationManager.getLastKnownLocation(provider);
+
+        Date dateTime = new Date();
+        Double lat = location1.getLatitude();
+        Double lng = location1.getLongitude();
+        String deviceId = telephonyManager.getDeviceId();
+
+
+        DeviceLocation deviceLocation = new DeviceLocation(deviceId, lat.toString(),
+                                                            lng.toString(), dateTime);
+
+        return deviceLocation;
+    }
+
     public class ApiActionTask extends AsyncTask<String, Void, String> {
 
         @Override
@@ -120,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             URL url;
             HttpsURLConnection httpsURLConnection = null;
 
-            
 
             try {
                 url = new URL(urls[0]);
