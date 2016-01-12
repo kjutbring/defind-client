@@ -1,5 +1,7 @@
 package com.defind.kittyj.defind_client;
 
+import java.util.Date;
+
 /**
  * Created by kittyj on 1/11/16.
  */
@@ -8,15 +10,7 @@ public class DeviceLocation {
     private String device;
     private String lat;
     private String lng;
-    private String time;
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
+    private Date time;
 
     public String getDevice() {
         return device;
@@ -40,5 +34,13 @@ public class DeviceLocation {
 
     public void setLng(String lng) {
         this.lng = lng;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
     }
 }
