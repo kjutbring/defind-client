@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return jsonObject;
     }
 
-    public DeviceLocation createDeviceLocation(Location location) {
+    public DeviceLocation createDeviceLocation() {
 
         TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -150,11 +150,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             URL url;
             HttpsURLConnection httpsURLConnection = null;
 
+            // create a deviceLocation object
+            DeviceLocation deviceLocation = createDeviceLocation();
+            // create a JSON object from the deviceLocation object
+            JSONObject locationJSON = constructLocationJsonObject(deviceLocation);
 
             try {
                 url = new URL(urls[0]);
 
                 httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                try {
+
+                }
 
 
 
