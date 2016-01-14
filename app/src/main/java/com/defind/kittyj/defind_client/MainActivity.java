@@ -25,10 +25,14 @@ import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     LocationManager locationManager;
     String provider;
+    String SECRETKEY = "kittys_super_cool_secret";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,8 +161,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
             try {
                 url = new URL(urls[0]);
-
                 httpsURLConnection = (HttpsURLConnection) url.openConnection();
+                httpsURLConnection.setRequestMethod("POST");
+                httpsURLConnection.setRequestProperty("Content-Type", "application/json");
+                httpsURLConnection.setRequestProperty("Accept", "application/json");
+                httpsURLConnection.setDoOutput(true);
+
                 try {
 
                 }
@@ -171,6 +179,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 e.printStackTrace();
             }
         }
+    }
+
+    public String generateJWT() {
+
+        String jwt = Jwts.builder().setSubject("kittyj").signWith(SignatureAlgorithm.HS256, SECRETKEY).compact();
+
+        return jwt;
     }
 
 
