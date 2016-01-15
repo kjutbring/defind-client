@@ -47,8 +47,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             // TODO: Consider calling
             //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
             // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
+            //   public void onRequestProuter                int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for Activity#requestPermissions for more details.
             return;
@@ -119,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return jsonObject;
     }
 
-    public DeviceLocation createDeviceLocation() {
+    public DeviceLocation createDeviceLocation(Location location) {
 
         TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -133,11 +132,10 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             // for Activity#requestPermissions for more details.
             return null;
         }
-        Location location1 = locationManager.getLastKnownLocation(provider);
 
         Date dateTime = new Date();
-        Double lat = location1.getLatitude();
-        Double lng = location1.getLongitude();
+        Double lat = location.getLatitude();
+        Double lng = location.getLongitude();
         String deviceId = telephonyManager.getDeviceId();
 
 
@@ -158,26 +156,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             DeviceLocation deviceLocation = createDeviceLocation();
             // create a JSON object from the deviceLocation object
             JSONObject locationJSON = constructLocationJsonObject(deviceLocation);
+            // create jwt
+            String jwt = generateJWT();
 
             try {
                 url = new URL(urls[0]);
                 httpsURLConnection = (HttpsURLConnection) url.openConnection();
                 httpsURLConnection.setRequestMethod("POST");
                 httpsURLConnection.setRequestProperty("Content-Type", "application/json");
+                httpsURLConnection.setRequestProperty("Authorization", "Bearer " + jwt);
                 httpsURLConnection.setRequestProperty("Accept", "application/json");
                 httpsURLConnection.setDoOutput(true);
 
-                try {
-
-                }
-
-
+                 httpsURLConnection.connect();
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            return null;
         }
     }
 
