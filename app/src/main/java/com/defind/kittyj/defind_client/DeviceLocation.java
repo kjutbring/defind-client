@@ -7,12 +7,12 @@ import java.util.Date;
  */
 public class DeviceLocation {
 
-    private String device;
-    private String lat;
-    private String lng;
+    private Integer device;
+    private Double lat;
+    private Double lng;
     private Date time;
 
-    public DeviceLocation(String inDevice, String inLat, String inLng, Date inTime) {
+    public DeviceLocation(Integer inDevice, Double inLat, Double inLng, Date inTime) {
 
         device = inDevice;
         lat = inLat;
@@ -20,27 +20,27 @@ public class DeviceLocation {
         time = inTime;
     }
 
-    public String getDevice() {
+    public Integer getDevice() {
         return device;
     }
 
-    public void setDevice(String device) {
+    public void setDevice(Integer device) {
         this.device = device;
     }
 
-    public String getLat() {
+    public Double getLat() {
         return lat;
     }
 
-    public void setLat(String lat) {
+    public void setLat(Double lat) {
         this.lat = lat;
     }
 
-    public String getLng() {
+    public Double getLng() {
         return lng;
     }
 
-    public void setLng(String lng) {
+    public void setLng(Double lng) {
         this.lng = lng;
     }
 
