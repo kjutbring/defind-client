@@ -13,20 +13,25 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.MacProvider;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
@@ -60,6 +65,19 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } else {
             Log.i("DeviceLocation info", "No location");
         }
+
+        DeviceLocation lol = createDeviceLocation(location);
+        Log.i("Time: ", lol.getTime().toString());
+        Log.i("Device Location: ", lol.getLat().toString());
+        Log.i("Device Location: ", lol.getLng().toString());
+        Log.i("Device ID: ", lol.getDevice());
+
+        JSONObject slask = constructLocationJsonObject(lol);
+        Log.i("Location JSON: ", slask.toString());
+
+        Log.i("JWT: ", generateJWT());
+
+
     }
 
     @Override
@@ -138,50 +156,25 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Double lng = location.getLongitude();
         String deviceId = telephonyManager.getDeviceId();
 
-
-        DeviceLocation deviceLocation = new DeviceLocation(deviceId, lat.toString(),
-                                                            lng.toString(), dateTime);
+        DeviceLocation deviceLocation = new DeviceLocation(deviceId, lat,
+                lng, dateTime);
 
         return deviceLocation;
     }
 
-    public class ApiActionTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-            URL url;
-            HttpsURLConnection httpsURLConnection = null;
-
-            // create a deviceLocation object
-            DeviceLocation deviceLocation = createDeviceLocation();
-            // create a JSON object from the deviceLocation object
-            JSONObject locationJSON = constructLocationJsonObject(deviceLocation);
-            // create jwt
-            String jwt = generateJWT();
-
-            try {
-                url = new URL(urls[0]);
-                httpsURLConnection = (HttpsURLConnection) url.openConnection();
-                httpsURLConnection.setRequestMethod("POST");
-                httpsURLConnection.setRequestProperty("Content-Type", "application/json");
-                httpsURLConnection.setRequestProperty("Authorization", "Bearer " + jwt);
-                httpsURLConnection.setRequestProperty("Accept", "application/json");
-                httpsURLConnection.setDoOutput(true);
-
-                 httpsURLConnection.connect();
-
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-    }
-
     public String generateJWT() {
 
-        String jwt = Jwts.builder().setSubject("kittyj").signWith(SignatureAlgorithm.HS256, SECRETKEY).compact();
+        //encode secret to base64
+        byte[] secret = null;
+        try {
+            secret = SECRETKEY.getBytes("utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        String base64Secret = Base64.encodeToString(secret, Base64.DEFAULT);
+
+        String jwt = Jwts.builder().setSubject("kittyj").signWith(SignatureAlgorithm.HS256, base64Secret).compact();
 
         return jwt;
     }
