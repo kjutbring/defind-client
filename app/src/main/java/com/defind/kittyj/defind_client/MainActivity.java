@@ -179,5 +179,26 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return jwt;
     }
 
+    public class ApiAction extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            String result = "";
+            URL url;
+            HttpsURLConnection httpsURLConnection = null;
+
+
+
+            try {
+                url = new URL(urls[0]);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+    }
+
 
 }
