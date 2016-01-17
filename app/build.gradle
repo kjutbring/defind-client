@@ -4,6 +4,11 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+
     defaultConfig {
         applicationId "com.defind.kittyj.defind_client"
         minSdkVersion 23
