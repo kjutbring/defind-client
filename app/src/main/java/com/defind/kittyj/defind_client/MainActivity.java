@@ -19,10 +19,17 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
@@ -66,17 +73,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             Log.i("DeviceLocation info", "No location");
         }
 
-        DeviceLocation lol = createDeviceLocation(location);
-        Log.i("Time: ", lol.getTime().toString());
-        Log.i("Device Location: ", lol.getLat().toString());
-        Log.i("Device Location: ", lol.getLng().toString());
-        Log.i("Device ID: ", lol.getDevice());
-
-        JSONObject slask = constructLocationJsonObject(lol);
-        Log.i("Location JSON: ", slask.toString());
-
-        Log.i("JWT: ", generateJWT());
-
+        sendLocation();
 
     }
 
@@ -127,9 +124,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         try {
             jsonObject.put("device", deviceLocation.getDevice());
-            jsonObject.put("lat", deviceLocation.getLat());
-            jsonObject.put("lng", deviceLocation.getLng());
-            jsonObject.put("time", deviceLocation.getTime());
+            jsonObject.put("lat", deviceLocation.getLat().toString());
+            jsonObject.put("lng", deviceLocation.getLng().toString());
+            jsonObject.put("time", deviceLocation.getTime().toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -179,21 +176,82 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return jwt;
     }
 
+    public String sendLocation() {
+        String url = "ip-address";
+        String result = "";
+        ApiAction apiAction = new ApiAction();
+
+        try {
+            result = apiAction.execute(url).get();
+            return result;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     public class ApiAction extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... urls) {
 
-            String result = "";
             URL url;
-            HttpsURLConnection httpsURLConnection = null;
+            HttpURLConnection httpURLConnection = null;
+            OutputStreamWriter outputStreamWriter;
+            InputStream input;
 
+            // check location permissions
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                return null;
+            }
+            Location location = locationManager.getLastKnownLocation(provider);
 
+            DeviceLocation deviceLocation = createDeviceLocation(location);
+            String jsonLocation = constructLocationJsonObject(deviceLocation).toString();
+
+            String jwt = generateJWT();
 
             try {
                 url = new URL(urls[0]);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json");
+                httpURLConnection.setRequestProperty("Authorization", "Bearer " + jwt);
+                httpURLConnection.connect();
+
+                outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+                outputStreamWriter.write(jsonLocation);
+                outputStreamWriter.flush();
+                outputStreamWriter.close();
+
+                input = httpURLConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                StringBuilder result = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+                return result.toString();
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                httpURLConnection.disconnect();
             }
 
             return null;
