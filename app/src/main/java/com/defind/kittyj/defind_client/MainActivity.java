@@ -1,6 +1,8 @@
 package com.defind.kittyj.defind_client;
 
 import android.Manifest;
+import android.app.job.*;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -8,19 +10,18 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 
+import com.defind.kittyj.defind_client.services.MyjobService;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,22 +30,20 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     LocationManager locationManager;
     String provider;
     String SECRETKEY = "kittys_super_cool_secret";
+
+    // job service things
+    private JobScheduler mJobScheduler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,16 +64,14 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return;
         }
 
-        Location location = locationManager.getLastKnownLocation(provider);
+    }
 
-        if (location != null) {
-            Log.i("DeviceLocation info", "DeviceLocation achieved!");
-        } else {
-            Log.i("DeviceLocation info", "No location");
-        }
-
-        sendLocation();
-
+    public void constructJob() {
+        mJobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        JobInfo.Builder builder = new JobInfo.Builder(1,
+                new ComponentName(getPackageName(), MyjobService.class.getName()));
+        builder.setPeriodic(3000);
+        mJobScheduler.schedule(builder.build());
     }
 
     @Override
@@ -92,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
         locationManager.requestLocationUpdates(provider, 400, 1, this);
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -177,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public String sendLocation() {
-        String url = "ip-address";
+        String url = "http://185.86.151.212:3000/api/location";
         String result = "";
         ApiAction apiAction = new ApiAction();
 
@@ -244,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
+                Log.i("RESULT: ", result.toString());
                 return result.toString();
 
             } catch (MalformedURLException e) {
@@ -257,6 +254,5 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return null;
         }
     }
-
 
 }
