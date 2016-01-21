@@ -50,6 +50,7 @@ public class MyjobService extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         Log.i("START JOB: ", String.valueOf(params.getJobId()));
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
         sendLocation();
@@ -66,17 +67,6 @@ public class MyjobService extends JobService {
     public DeviceLocation createDeviceLocation(Location location) {
 
         TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
-
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return null;
-        }
 
         Date dateTime = new Date();
         Double lat = location.getLatitude();
@@ -122,7 +112,7 @@ public class MyjobService extends JobService {
     }
 
     public String sendLocation() {
-        String url = "http://185.86.151.212:3000/api/location";
+        String url = "";
         String result = "";
         ApiAction apiAction = new ApiAction();
 
