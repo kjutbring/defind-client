@@ -53,6 +53,7 @@ public class MyjobService extends JobService {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
+        deleteLocation();
         sendLocation();
 
         return false;
@@ -111,13 +112,37 @@ public class MyjobService extends JobService {
         return jsonObject;
     }
 
-    public String sendLocation() {
-        String url = "";
+    public String getDeviceId() {
+
+        TelephonyManager telephonyManager = (TelephonyManager) getBaseContext().getSystemService(Context.TELEPHONY_SERVICE);
+        return telephonyManager.getDeviceId();
+    }
+
+    public String deleteLocation() {
+        String deviceId = getDeviceId();
+        String url = "http://185.86.151.212:3000/api/location/" + deviceId;
         String result = "";
-        ApiAction apiAction = new ApiAction();
+
+        DeleteApiAction deleteApiAction = new DeleteApiAction();
 
         try {
-            result = apiAction.execute(url).get();
+            result = deleteApiAction.execute(url).get();
+            return result;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public String sendLocation() {
+        String url = "http://185.86.151.212:3000/api/location";
+        String result = "";
+        AddApiAction addApiAction = new AddApiAction();
+
+        try {
+            result = addApiAction.execute(url).get();
             return result;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -128,7 +153,7 @@ public class MyjobService extends JobService {
         return result;
     }
 
-    public class ApiAction extends AsyncTask<String, Void, String> {
+    public class AddApiAction extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... urls) {
@@ -193,5 +218,47 @@ public class MyjobService extends JobService {
             return null;
         }
     }
+
+    public class DeleteApiAction extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... urls) {
+
+            URL url;
+            HttpURLConnection httpURLConnection;
+            String jwt = generateJWT();
+
+            OutputStreamWriter outputStreamWriter;
+            InputStream input;
+
+            try {
+                url = new URL(urls[0]);
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setDoOutput(true);
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.setRequestMethod("DELETE");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json");
+                httpURLConnection.setRequestProperty("Authorization", "Bearer " + jwt);
+                httpURLConnection.connect();
+
+                outputStreamWriter = new OutputStreamWriter(httpURLConnection.getOutputStream());
+                outputStreamWriter.flush();
+                outputStreamWriter.close();
+
+                input = httpURLConnection.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                StringBuilder result = new StringBuilder();
+                String line;
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+
 
 }
