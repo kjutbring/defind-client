@@ -9,14 +9,11 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 
 import com.defind.kittyj.defind_client.DeviceLocation;
-import com.defind.kittyj.defind_client.MainActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
