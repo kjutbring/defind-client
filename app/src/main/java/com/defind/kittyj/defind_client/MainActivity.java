@@ -11,6 +11,9 @@ import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+
 import com.defind.kittyj.defind_client.services.MyjobService;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +53,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         if (!permissions.isEmpty()) {
             requestPermissions(permissions.toArray(new String[permissions.size()]), 1);
         }
+    }
 
+    public void startButtonClicked(View view) {
         constructJob();
+
+        TextView infoTextView = (TextView) findViewById(R.id.infoTextView);
+        infoTextView.setText("Tracking");
 
     }
 
