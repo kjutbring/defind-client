@@ -53,6 +53,7 @@ public class MyjobService extends JobService {
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         provider = locationManager.getBestProvider(new Criteria(), false);
+
         deleteLocation();
         sendLocation();
 
